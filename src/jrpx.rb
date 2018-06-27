@@ -11,7 +11,7 @@ java_import com.badlogic.gdx.graphics.g2d.SpriteBatch
 class %s < ApplicationAdapter
     def create
         @batch = SpriteBatch.new()
-        @img = Texture.new(\"badlogic.jpg\")
+        @img = Texture.new(\"assets/badlogic.jpg\")
     end
 
     def render
@@ -52,7 +52,7 @@ def show_help
         '   dist:rb, dist:rb [output] :compiles into a final boostrap jar[RB]',
         ' Additionals',
         '  jrp run [-w [folder]] [-l]',
-        '     example -w: `jrp run -w assets` will run inside the folder assets',
+        '     example -w: `jrp run -w imgs` will run inside the folder imgs',
         '     so can access the files inside her without need to run dist',
         '     only supports 1 level folder yet',
         '',
@@ -177,7 +177,6 @@ if ARGV[0] != nil
                 ['gdx.jar',
                  'gdx-natives.jar',
                  'gdx-backend-lwjgl.jar',
-                 'gdx-backend-lwjgl.jar',
                  'gdx-backend-lwjgl-natives.jar'].each do |file|
                     download "./libs/#{file}", "#{hoster}/#{file}", message='Downloading ' + file
                 end
@@ -203,7 +202,8 @@ if ARGV[0] != nil
 
         runned = false
 
-        past = false
+        folder_name = Dir.pwd
+
         if ARGV[1] != nil
             if ARGV[1] == '-w'
                 folder_name = ARGV[2] if ARGV[2]!=nil
@@ -222,7 +222,6 @@ if ARGV[0] != nil
         final_program = ""
 
         main_class = get_main_class
-        required_files = []
         
         start_code = File.read "./src/#{main_class}.rb"
 
@@ -231,7 +230,7 @@ if ARGV[0] != nil
         start_code = clear_require_calls(start_code, require_calls)
         
         # Load of jars not by user. So it only happens here.
-        final_program << "Dir['./libs/*.jar'].each { |jar| require jar if jar!='./libs/jruby.jar' }\n"
+        final_program << "Dir['./libs/*.jar'].each { |jar| require jar unless jar.include? 'jruby' }\n"
 
         Dir.chdir './src' do
             require_calls.each do |r|
@@ -256,11 +255,20 @@ if ARGV[0] != nil
         end
 
         begin
-            eval final_program
+            Dir.chdir folder_name do 
+                eval final_program
+            end
         rescue Exception => e
             puts e.message, e.backtrace.inspect
         end
+    when 'dist'
+        abort 'Not developed yet'
+    when 'dist:rb'
+        abort 'Not developed yet'
+    when '--help', '-h'
+        show_help
     end
 else
-
+    puts 'No option specified'
+    show_help
 end
