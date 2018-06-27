@@ -1,0 +1,12 @@
+require 'net/http'
+require './example'
+require 'diamond'
+
+require './sample2.jar'
+
+require './lunar.jar';require './easy.rb'
+
+require ' ./libs/sample.jar '
+
+require 'dashed'
+[].each 
